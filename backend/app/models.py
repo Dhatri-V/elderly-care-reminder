@@ -1,3 +1,4 @@
+import secrets
 from datetime import date, datetime, time
 
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Time, UniqueConstraint
@@ -25,8 +26,13 @@ class Elder(Base):
     name: Mapped[str] = mapped_column(String(255))
     language: Mapped[str] = mapped_column(String(2), default="en")  # kn / hi / en
     timezone: Mapped[str] = mapped_column(String(64), default="Asia/Kolkata")
+    # Lets the elder's device show their screen without a login.
+    screen_token: Mapped[str] = mapped_column(
+        String(64), unique=True, default=lambda: secrets.token_urlsafe(24)
+    )
 
     medicines: Mapped[list["Medicine"]] = relationship(cascade="all, delete-orphan")
+    appointments: Mapped[list["Appointment"]] = relationship(cascade="all, delete-orphan")
 
 
 class CaregiverElder(Base):
@@ -94,3 +100,14 @@ class DoseEvent(Base):
 
     medicine: Mapped[Medicine] = relationship()
     elder: Mapped[Elder] = relationship()
+
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    elder_id: Mapped[int] = mapped_column(ForeignKey("elders.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(255))
+    doctor: Mapped[str | None] = mapped_column(String(255))
+    location: Mapped[str | None] = mapped_column(String(255))
+    starts_at: Mapped[datetime] = mapped_column(DateTime)  # elder's local time

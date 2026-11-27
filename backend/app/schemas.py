@@ -48,6 +48,7 @@ class ElderIn(BaseModel):
 class ElderOut(ElderIn):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    screen_token: str
 
 
 class MedicineIn(BaseModel):
@@ -106,3 +107,37 @@ class NextDose(BaseModel):
     quantity: float
     food_timing: str
     scheduled_at: datetime
+
+    @classmethod
+    def from_dose(cls, dose) -> "NextDose":
+        return cls(
+            dose_id=dose.id,
+            medicine_name=dose.medicine.name,
+            strength=dose.medicine.strength,
+            photo_url=dose.medicine.photo_url,
+            quantity=dose.quantity,
+            food_timing=dose.medicine.food_timing,
+            scheduled_at=dose.scheduled_at,
+        )
+
+
+class AppointmentIn(BaseModel):
+    title: str = Field(min_length=1)
+    doctor: str | None = None
+    location: str | None = None
+    starts_at: datetime  # elder's local time
+
+
+class AppointmentOut(AppointmentIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    elder_id: int
+
+
+class Screen(BaseModel):
+    """Everything the elder's one screen shows."""
+
+    elder_name: str
+    language: str
+    next_dose: NextDose | None
+    next_appointment: AppointmentOut | None

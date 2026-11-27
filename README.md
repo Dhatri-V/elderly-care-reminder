@@ -21,4 +21,8 @@ Caregivers get a Telegram message for missed doses and when a medicine's stock r
 1. Create a bot with [@BotFather](https://t.me/BotFather) and put its token in `TELEGRAM_BOT_TOKEN`.
 2. Each caregiver messages the bot, then saves their chat id with `PUT /auth/me/telegram`.
 
+### Elder screen, SOS and appointments
+
+Each elder has a `screen_token` (shown in `GET /elders/{id}`). The elder's device sends it as the `X-Screen-Token` header to `GET /screen` (next dose and next appointment), `POST /screen/doses/{id}/take`, `POST /screen/doses/{id}/snooze` and `POST /screen/sos`. SOS sends a Telegram alert to every caregiver. If a phone is lost, `POST /elders/{id}/screen-token` makes a new token.
+
 No database migrations yet: after pulling new model changes, delete `elderly_care.db` so tables are recreated.
