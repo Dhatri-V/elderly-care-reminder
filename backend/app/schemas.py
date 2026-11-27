@@ -21,6 +21,10 @@ class UserOut(BaseModel):
     email: str
 
 
+class TelegramIn(BaseModel):
+    chat_id: str = Field(min_length=1, max_length=64)
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

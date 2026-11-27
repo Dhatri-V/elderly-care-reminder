@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.deps import current_user
 from app.models import User
-from app.schemas import Login, Token, UserOut
+from app.schemas import Login, TelegramIn, Token, UserOut
 from app.security import create_token, hash_password, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -32,3 +32,12 @@ def login(body: Login, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(current_user)):
     return user
+
+
+@router.put("/me/telegram", status_code=204)
+def set_telegram(
+    body: TelegramIn, user: User = Depends(current_user), db: Session = Depends(get_db)
+):
+    """Save the caregiver's Telegram chat id for missed-dose, refill and SOS alerts."""
+    user.telegram_chat_id = body.chat_id
+    db.commit()
