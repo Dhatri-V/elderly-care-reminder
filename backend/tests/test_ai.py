@@ -61,9 +61,12 @@ def llm(monkeypatch):
 def test_chat_falls_back_to_next_model(monkeypatch):
     tried = []
 
-    def completion(model, messages, temperature):
-        tried.append(model)
-        if model.startswith("gemini"):
+    monkeypatch.setattr(ai.settings, "gemini_api_key", "g-key")
+    monkeypatch.setattr(ai.settings, "openrouter_api_key", "o-key")
+
+    def completion(model, messages, temperature, api_key, timeout):
+        tried.append((model, api_key))
+        if model.startswith("gemini/"):
             raise RuntimeError("quota")
 
         class R:
@@ -73,7 +76,9 @@ def test_chat_falls_back_to_next_model(monkeypatch):
 
     monkeypatch.setattr(ai.litellm, "completion", completion)
     assert ai.chat([{"role": "user", "content": "x"}]) == "hi"
-    assert tried[0].startswith("gemini") and len(tried) == 2
+    assert tried[0] == ("gemini/gemini-3.8-flash", "g-key")
+    assert tried[1][1] == "o-key"  # fallback gets the OpenRouter key
+    assert len(tried) == 2
 
 
 def test_scan_returns_drafts_and_flags_problems(client, auth, llm, elder_with_medicine):
