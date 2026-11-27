@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AiTools from "./AiTools.jsx";
 import { api, fromUtc } from "./api.js";
 
 // Read a <form> into a plain object, dropping empty fields.
@@ -228,6 +229,8 @@ function Elder({ elder, token, onChange }) {
         <input name="starts_at" type="datetime-local" required />
         <button>Add appointment</button>
       </form>
+
+      <AiTools elderId={elder.id} token={token} onChange={load} />
     </section>
   );
 }
@@ -251,7 +254,7 @@ export default function Caregiver() {
   const loadElders = () =>
     api("/elders", { token })
       .then(setElders)
-      .catch(logout);
+      .catch((e) => e.status === 401 && logout());
 
   useEffect(() => {
     if (token) loadElders();

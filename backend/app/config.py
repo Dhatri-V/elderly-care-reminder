@@ -14,5 +14,13 @@ class Settings(BaseSettings):
     missed_after_minutes: int = 30
     run_scheduler: bool = True
 
+    # Tried in order. API keys come from env: GEMINI_API_KEY, OPENROUTER_API_KEY.
+    llm_models: str = (
+        "gemini/gemini-2.5-flash,"
+        "openrouter/qwen/qwen-2.5-72b-instruct,"
+        "openrouter/nvidia/llama-3.1-nemotron-70b-instruct"
+    )
+    chroma_dir: str = "chroma_data"
+
 
 settings = Settings()
