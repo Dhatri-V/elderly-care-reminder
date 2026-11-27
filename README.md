@@ -26,3 +26,18 @@ Caregivers get a Telegram message for missed doses and when a medicine's stock r
 Each elder has a `screen_token` (shown in `GET /elders/{id}`). The elder's device sends it as the `X-Screen-Token` header to `GET /screen` (next dose and next appointment), `POST /screen/doses/{id}/take`, `POST /screen/doses/{id}/snooze` and `POST /screen/sos`. SOS sends a Telegram alert to every caregiver. If a phone is lost, `POST /elders/{id}/screen-token` makes a new token.
 
 No database migrations yet: after pulling new model changes, delete `elderly_care.db` so tables are recreated.
+
+## App (PWA)
+
+React + Vite app in `frontend/`. Run the backend first, then:
+
+```bash
+cd frontend
+npm install
+npm run dev     # http://localhost:5173 (calls the backend through /api)
+npm test
+npm run build   # production build in dist/
+```
+
+- **Caregivers** open the app, log in, add elders, medicines, schedules and appointments.
+- **Elders** use the "Elder screen link" from the caregiver page (`/#/screen/<token>`): one big screen with the tablet photo, name, dose, food timing, a huge **I TOOK IT** button, **Remind me later** and **SOS**. Reminders are spoken in Kannada, Hindi or English. If the phone has no voice for the elder's language, the reminder is spoken in English. Medicine and elder names typed in Kannada or Hindi script sound best.
