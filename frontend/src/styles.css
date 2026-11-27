@@ -1,0 +1,41 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; color: #1a1a1a; background: #f6f7f6; }
+button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 10px 16px; background: #1b5e20; color: #fff; }
+button.secondary { background: #e3e8e3; color: #1a1a1a; }
+button.link { background: none; color: #1b5e20; text-decoration: underline; padding: 4px; }
+input, select { font: inherit; padding: 10px; border: 1px solid #ccc; border-radius: 8px; width: 100%; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.row > input, .row > select { flex: 1 1 160px; width: auto; }
+.spread { justify-content: space-between; }
+.muted { color: #666; font-size: 14px; }
+.error { color: #b71c1c; }
+
+/* Caregiver */
+.caregiver { max-width: 760px; margin: 0 auto; padding: 16px; }
+.card { background: #fff; border-radius: 12px; padding: 16px; margin: 12px 0; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px #0001; }
+.card.row { flex-direction: row; }
+ul.plain { list-style: none; padding: 0; }
+.status { padding: 2px 8px; border-radius: 6px; background: #eee; font-size: 13px; }
+.status.taken { background: #c8e6c9; }
+.status.missed { background: #ffcdd2; }
+.status.snoozed { background: #fff3c4; }
+
+/* Elder screen: very large, high contrast, few choices */
+.elder { min-height: 100vh; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; background: #fff; font-size: 26px; }
+.elder h1 { margin: 0; font-size: 34px; }
+.elder .dose { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 520px; }
+.elder img { width: 220px; height: 220px; object-fit: contain; border-radius: 20px; border: 3px solid #ddd; }
+.elder .pill { font-size: 140px; line-height: 1; }
+.elder p { margin: 0; }
+.elder .medicine { font-size: 36px; font-weight: 700; }
+.elder .quantity { font-size: 56px; font-weight: 800; }
+.elder .food { font-size: 30px; background: #fff3c4; padding: 6px 18px; border-radius: 12px; }
+.elder .when { display: flex; align-items: center; gap: 12px; }
+.elder .speak { font-size: 32px; background: #e3e8e3; padding: 6px 14px; }
+.elder .took { width: 100%; font-size: 44px; font-weight: 800; padding: 36px 16px; border-radius: 24px; }
+.elder .later { width: 100%; font-size: 26px; padding: 18px; background: #e3e8e3; color: #1a1a1a; border-radius: 18px; }
+.elder .big { font-size: 34px; margin-top: 30vh; }
+.elder .next { font-size: 26px; color: #555; }
+.elder .appointment { font-size: 22px; color: #333; }
+.elder .sos { margin-top: auto; width: 100%; max-width: 520px; font-size: 28px; font-weight: 800; padding: 22px; background: #c62828; border-radius: 18px; }
