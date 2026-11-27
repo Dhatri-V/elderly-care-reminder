@@ -12,6 +12,9 @@ dependencies = [
     "pymysql>=1.1",
     "apscheduler>=3.10,<4",
     "httpx>=0.27",
+    "litellm>=1.50",
+    "chromadb>=1.0",
+    "langchain-text-splitters>=0.3",
 ]
 
 [project.optional-dependencies]

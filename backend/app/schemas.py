@@ -141,3 +141,44 @@ class Screen(BaseModel):
     language: str
     next_dose: NextDose | None
     next_appointment: AppointmentOut | None
+
+
+# AI
+
+
+class ScanIn(BaseModel):
+    image: str = Field(description="Photo as a data URL: data:image/jpeg;base64,...")
+
+
+class PrescriptionItem(BaseModel):
+    """A medicine read from a prescription. Nothing is saved until the caregiver confirms."""
+
+    name: str | None = None
+    strength: str | None = None
+    pattern: str | None = None
+    food_timing: FoodTiming = "any"
+    problem: str | None = None  # why the caregiver must fix this one before saving
+
+
+class ConfirmItem(MedicineIn):
+    pattern: str
+
+    @field_validator("pattern")
+    @classmethod
+    def valid_pattern(cls, v: str) -> str:
+        parse_pattern(v)
+        return v
+
+
+class ConfirmIn(BaseModel):
+    start_date: date
+    medicines: list[ConfirmItem]
+
+
+class DocumentIn(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    text: str = Field(min_length=1)
+
+
+class AskIn(BaseModel):
+    question: str = Field(min_length=1, max_length=1000)

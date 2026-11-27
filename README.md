@@ -25,6 +25,16 @@ Caregivers get a Telegram message for missed doses and when a medicine's stock r
 
 Each elder has a `screen_token` (shown in `GET /elders/{id}`). The elder's device sends it as the `X-Screen-Token` header to `GET /screen` (next dose and next appointment), `POST /screen/doses/{id}/take`, `POST /screen/doses/{id}/snooze` and `POST /screen/sos`. SOS sends a Telegram alert to every caregiver. If a phone is lost, `POST /elders/{id}/screen-token` makes a new token.
 
+### AI helpers
+
+Set `GEMINI_API_KEY` (and `OPENROUTER_API_KEY` for the Qwen / Nemotron fallbacks). Models are tried in the order of `LLM_MODELS`.
+
+- `POST /elders/{id}/prescriptions/scan`: reads a prescription photo into draft medicines. **Nothing is saved** until the caregiver checks them and calls `POST /elders/{id}/prescriptions/confirm`.
+- `POST /elders/{id}/documents` and `POST /elders/{id}/ask`: answers questions only from that elder's documents (stored in ChromaDB in `CHROMA_DIR`), with numbered sources. Dosage questions are refused.
+- `GET /elders/{id}/summary/weekly`: last 7 days taken/missed per medicine, plus a short AI summary.
+
+The first time documents are added, ChromaDB downloads its small local embedding model. Tests never call a real AI service.
+
 No database migrations yet: after pulling new model changes, delete `elderly_care.db` so tables are recreated.
 
 ## App (PWA)

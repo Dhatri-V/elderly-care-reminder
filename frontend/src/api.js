@@ -12,7 +12,9 @@ export async function api(path, { method = "GET", body, token, screenToken } = {
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     const detail = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
-    throw new Error(detail || `Request failed (${res.status})`);
+    const error = new Error(detail || `Request failed (${res.status})`);
+    error.status = res.status;
+    throw error;
   }
   return res.status === 204 ? null : res.json();
 }
