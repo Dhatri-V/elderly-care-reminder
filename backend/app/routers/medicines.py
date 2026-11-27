@@ -66,6 +66,8 @@ def update_medicine(
     medicine = get_medicine(db, user, medicine_id)
     for key, value in body.model_dump().items():
         setattr(medicine, key, value)
+    if medicine.stock_count > medicine.refill_threshold:
+        medicine.refill_alert_sent = False  # restocked, so alert again next time it runs low
     db.commit()
     return medicine
 

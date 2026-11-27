@@ -12,3 +12,13 @@ uvicorn app.main:app --reload   # API docs at http://127.0.0.1:8000/docs
 pytest                          # run tests
 ruff check . && ruff format --check .
 ```
+
+### Reminders and alerts
+
+While the server runs, a background job creates each elder's doses for today (every 30 min) and marks doses **missed** 30 minutes after they're due (or after a snooze ends).
+Caregivers get a Telegram message for missed doses and when a medicine's stock reaches its refill threshold.
+
+1. Create a bot with [@BotFather](https://t.me/BotFather) and put its token in `TELEGRAM_BOT_TOKEN`.
+2. Each caregiver messages the bot, then saves their chat id with `PUT /auth/me/telegram`.
+
+No database migrations yet: after pulling new model changes, delete `elderly_care.db` so tables are recreated.

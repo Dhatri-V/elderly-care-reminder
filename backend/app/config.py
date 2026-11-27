@@ -10,5 +10,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24
 
+    telegram_bot_token: str = ""  # alerts are skipped when empty
+    missed_after_minutes: int = 30
+    run_scheduler: bool = True
+
 
 settings = Settings()

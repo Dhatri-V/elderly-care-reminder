@@ -1,6 +1,7 @@
 import os
 
 os.environ["DATABASE_URL"] = "sqlite://"  # keep app import from creating a db file
+os.environ["RUN_SCHEDULER"] = "false"
 
 import pytest
 from fastapi.testclient import TestClient

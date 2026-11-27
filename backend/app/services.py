@@ -3,9 +3,15 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db import utcnow
 from app.models import DoseEvent, Elder, Medicine, Schedule
+from app.notify import alert_caregivers
 from app.pattern import parse_pattern
+
+
+def local_time(elder: Elder, utc_time: datetime) -> str:
+    return utc_time.replace(tzinfo=UTC).astimezone(ZoneInfo(elder.timezone)).strftime("%H:%M")
 
 
 def generate_doses(db: Session, elder: Elder, day: date) -> int:
@@ -47,6 +53,35 @@ def generate_doses(db: Session, elder: Elder, day: date) -> int:
     return created
 
 
+def generate_today_for_all(db: Session) -> None:
+    """Generate today's doses for every elder, using each elder's own timezone."""
+    for elder in db.query(Elder).all():
+        generate_doses(db, elder, datetime.now(ZoneInfo(elder.timezone)).date())
+
+
+def mark_missed(db: Session) -> int:
+    """Mark doses missed once they are overdue, and alert the caregivers."""
+    cutoff = utcnow() - timedelta(minutes=settings.missed_after_minutes)
+    overdue = (
+        db.query(DoseEvent)
+        .filter(
+            ((DoseEvent.status == "pending") & (DoseEvent.scheduled_at <= cutoff))
+            | ((DoseEvent.status == "snoozed") & (DoseEvent.snooze_until <= cutoff))
+        )
+        .all()
+    )
+    for dose in overdue:
+        dose.status = "missed"
+        alert_caregivers(
+            db,
+            dose.elder_id,
+            f"{dose.elder.name} missed {dose.quantity:g} x {dose.medicine.name} "
+            f"(due {local_time(dose.elder, dose.scheduled_at)}).",
+        )
+    db.commit()
+    return len(overdue)
+
+
 def next_dose(db: Session, elder: Elder) -> DoseEvent | None:
     """Earliest dose that is pending, or snoozed with the snooze time passed."""
     now = utcnow()
@@ -65,7 +100,15 @@ def next_dose(db: Session, elder: Elder) -> DoseEvent | None:
 def take_dose(db: Session, dose: DoseEvent) -> None:
     dose.status = "taken"
     dose.taken_at = utcnow()
-    dose.medicine.stock_count = max(0, dose.medicine.stock_count - dose.quantity)
+    medicine = dose.medicine
+    medicine.stock_count = max(0, medicine.stock_count - dose.quantity)
+    if medicine.stock_count <= medicine.refill_threshold and not medicine.refill_alert_sent:
+        medicine.refill_alert_sent = True
+        alert_caregivers(
+            db,
+            dose.elder_id,
+            f"Refill needed: {medicine.name} for {dose.elder.name}, {medicine.stock_count:g} left.",
+        )
     db.commit()
 
 
