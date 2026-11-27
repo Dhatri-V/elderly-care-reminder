@@ -37,6 +37,16 @@ The first time documents are added, ChromaDB downloads its small local embedding
 
 No database migrations yet: after pulling new model changes, delete `elderly_care.db` so tables are recreated.
 
+### Adherence analytics
+
+A Streamlit dashboard for the app owner: adherence %, taken/missed per day (in each elder's own timezone), per medicine, and medicines that need a refill. It reads the database directly, so don't expose it publicly.
+
+```bash
+cd backend
+pip install -e ".[analytics]"
+streamlit run analytics.py
+```
+
 ## App (PWA)
 
 React + Vite app in `frontend/`. Run the backend first, then:

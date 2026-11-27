@@ -19,6 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+analytics = ["streamlit>=1.40"]
 
 [build-system]
 requires = ["setuptools>=69"]
@@ -29,6 +30,7 @@ packages = ["app", "app.routers"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
