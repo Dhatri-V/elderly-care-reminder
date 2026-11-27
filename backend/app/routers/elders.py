@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -50,3 +52,14 @@ def update_elder(
 def delete_elder(elder_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
     db.delete(check_access(db, user, elder_id))
     db.commit()
+
+
+@router.post("/{elder_id}/screen-token", response_model=ElderOut)
+def new_screen_token(
+    elder_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)
+):
+    """Make a new screen link (e.g. if the elder's phone is lost). The old one stops working."""
+    elder = check_access(db, user, elder_id)
+    elder.screen_token = secrets.token_urlsafe(24)
+    db.commit()
+    return elder

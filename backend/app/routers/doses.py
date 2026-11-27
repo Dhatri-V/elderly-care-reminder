@@ -37,17 +37,7 @@ def list_doses(elder_id: int, user: User = Depends(current_user), db: Session = 
 @router.get("/elders/{elder_id}/next-dose", response_model=NextDose | None)
 def get_next_dose(elder_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
     dose = next_dose(db, check_access(db, user, elder_id))
-    if dose is None:
-        return None
-    return NextDose(
-        dose_id=dose.id,
-        medicine_name=dose.medicine.name,
-        strength=dose.medicine.strength,
-        photo_url=dose.medicine.photo_url,
-        quantity=dose.quantity,
-        food_timing=dose.medicine.food_timing,
-        scheduled_at=dose.scheduled_at,
-    )
+    return NextDose.from_dose(dose) if dose else None
 
 
 @router.post("/doses/{dose_id}/take", response_model=DoseOut)
