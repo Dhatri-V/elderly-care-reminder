@@ -12,17 +12,35 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.config import settings
 
 log = logging.getLogger(__name__)
+# Newer models reject some settings (like temperature); drop them instead of failing.
+litellm.drop_params = True
 
 
 class AIError(Exception):
     pass
 
 
+def api_key_for(model: str) -> str | None:
+    """Keys live in settings (.env); LiteLLM would otherwise only look in os.environ."""
+    if model.startswith("gemini/"):
+        return settings.gemini_api_key or None
+    if model.startswith("openrouter/"):
+        return settings.openrouter_api_key or None
+    return None
+
+
 def chat(messages: list[dict]) -> str:
     """Ask the first model that works: Gemini first, then the fallbacks."""
     for model in settings.llm_models.split(","):
+        model = model.strip()
         try:
-            response = litellm.completion(model=model.strip(), messages=messages, temperature=0.2)
+            response = litellm.completion(
+                model=model,
+                messages=messages,
+                temperature=0.2,
+                api_key=api_key_for(model),
+                timeout=60,
+            )
             return response.choices[0].message.content
         except Exception as e:  # any provider error: try the next model
             log.warning("AI model %s failed: %s", model, e)
