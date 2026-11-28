@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # Tried in order.
     llm_models: str = (
-        "gemini/gemini-3.8-flash,"
+        "gemini/gemini-flash-latest,"  # always Google's current Flash model
         "openrouter/qwen/qwen-2.5-72b-instruct,"
         "openrouter/nvidia/llama-3.1-nemotron-70b-instruct"
     )

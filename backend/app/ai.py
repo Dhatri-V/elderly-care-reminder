@@ -2,13 +2,18 @@
 
 import json
 import logging
+import os
 import re
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as CallTimeout
 
 import chromadb
-import litellm
+
+# Use the price list bundled with LiteLLM instead of downloading it from GitHub on start.
+os.environ.setdefault("LITELLM_LOCAL_MODEL_COST_MAP", "True")
+
+import litellm  # noqa: E402
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config import settings

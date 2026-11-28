@@ -77,7 +77,7 @@ def test_chat_falls_back_to_next_model(monkeypatch):
 
     monkeypatch.setattr(ai.litellm, "completion", completion)
     assert ai.chat([{"role": "user", "content": "x"}]) == "hi"
-    assert tried[0] == ("gemini/gemini-3.8-flash", "g-key")
+    assert tried[0] == ("gemini/gemini-flash-latest", "g-key")
     assert tried[1][1] == "o-key"  # fallback gets the OpenRouter key
     assert len(tried) == 2
 
