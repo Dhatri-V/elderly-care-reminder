@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         "openrouter/qwen/qwen-2.5-72b-instruct,"
         "openrouter/nvidia/llama-3.1-nemotron-70b-instruct"
     )
+    ai_timeout_seconds: float = 60
     gemini_api_key: str = ""
     openrouter_api_key: str = ""
     chroma_dir: str = "chroma_data"

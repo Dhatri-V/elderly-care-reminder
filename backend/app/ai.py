@@ -4,6 +4,8 @@ import json
 import logging
 import re
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as CallTimeout
 
 import chromadb
 import litellm
@@ -29,20 +31,38 @@ def api_key_for(model: str) -> str | None:
     return None
 
 
+def ask_model(model: str, messages: list[dict]) -> str:
+    """One call with a hard time limit.
+
+    LiteLLM's own timeout doesn't always fire on a stalled connection, so the call runs
+    in a thread and we stop waiting for it after the limit.
+    """
+    limit = settings.ai_timeout_seconds
+    pool = ThreadPoolExecutor(max_workers=1)
+    future = pool.submit(
+        litellm.completion,
+        model=model,
+        messages=messages,
+        temperature=0.2,
+        api_key=api_key_for(model),
+        timeout=limit,
+        num_retries=0,
+    )
+    pool.shutdown(wait=False)  # don't block on a stuck call
+    try:
+        response = future.result(timeout=limit)
+    except CallTimeout:
+        raise TimeoutError(f"no answer within {limit:g} s") from None
+    return response.choices[0].message.content
+
+
 def chat(messages: list[dict]) -> str:
     """Ask the first model that works: Gemini first, then the fallbacks."""
     for model in settings.llm_models.split(","):
         model = model.strip()
         try:
-            response = litellm.completion(
-                model=model,
-                messages=messages,
-                temperature=0.2,
-                api_key=api_key_for(model),
-                timeout=60,
-            )
-            return response.choices[0].message.content
-        except Exception as e:  # any provider error: try the next model
+            return ask_model(model, messages)
+        except Exception as e:  # any provider error or timeout: try the next model
             log.warning("AI model %s failed: %s", model, e)
     raise AIError("AI is not available right now. Please try again later.")
 

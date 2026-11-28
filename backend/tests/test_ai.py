@@ -1,5 +1,6 @@
 """AI endpoints. The LLM is faked: tests never call a real (paid) API."""
 
+import time
 from datetime import timedelta
 
 import chromadb
@@ -64,7 +65,7 @@ def test_chat_falls_back_to_next_model(monkeypatch):
     monkeypatch.setattr(ai.settings, "gemini_api_key", "g-key")
     monkeypatch.setattr(ai.settings, "openrouter_api_key", "o-key")
 
-    def completion(model, messages, temperature, api_key, timeout):
+    def completion(model, messages, temperature, api_key, timeout, num_retries):
         tried.append((model, api_key))
         if model.startswith("gemini/"):
             raise RuntimeError("quota")
@@ -79,6 +80,17 @@ def test_chat_falls_back_to_next_model(monkeypatch):
     assert tried[0] == ("gemini/gemini-3.8-flash", "g-key")
     assert tried[1][1] == "o-key"  # fallback gets the OpenRouter key
     assert len(tried) == 2
+
+
+def test_stuck_model_is_given_up_on_quickly(monkeypatch):
+    monkeypatch.setattr(ai.settings, "ai_timeout_seconds", 0.2)
+    monkeypatch.setattr(ai.settings, "llm_models", "gemini/slow")
+    monkeypatch.setattr(ai.litellm, "completion", lambda **kwargs: time.sleep(3))
+
+    start = time.monotonic()
+    with pytest.raises(ai.AIError):
+        ai.chat([{"role": "user", "content": "x"}])
+    assert time.monotonic() - start < 1
 
 
 def test_scan_returns_drafts_and_flags_problems(client, auth, llm, elder_with_medicine):
